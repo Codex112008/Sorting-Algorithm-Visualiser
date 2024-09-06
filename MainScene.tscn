@@ -41,12 +41,10 @@ grow_vertical = 2
 custom_minimum_size = Vector2(230.4, 48)
 layout_mode = 2
 min_value = 8.0
-max_value = 512.0
+max_value = 1024.0
 step = 8.0
 value = 64.0
 rounded = true
-tick_count = 4
-ticks_on_borders = true
 
 [node name="LengthDisplay" type="RichTextLabel" parent="Buttons"]
 custom_minimum_size = Vector2(100, 0)
@@ -60,7 +58,7 @@ text = "Shuffle"
 [node name="SortingMethod" type="OptionButton" parent="Buttons"]
 layout_mode = 2
 selected = 1
-item_count = 4
+item_count = 5
 popup/item_0/text = "Comb Sort"
 popup/item_1/text = "Bubble Sort"
 popup/item_1/id = 1
@@ -68,6 +66,8 @@ popup/item_2/text = "Stalin Sort"
 popup/item_2/id = 2
 popup/item_3/text = "Bogo Sort"
 popup/item_3/id = 3
+popup/item_4/text = "Quicksort"
+popup/item_4/id = 4
 
 [node name="SortButton" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(100, 0)

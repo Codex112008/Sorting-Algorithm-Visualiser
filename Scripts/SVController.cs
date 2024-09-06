@@ -39,25 +39,35 @@ public partial class SVController : HBoxContainer
 		}
 	}
 
-	public void SortArray()
+	public async void SortArray()
 	{
+		if (sorting == true)
+		{
+			sorting = false;
+			await Wait(0.0025f);
+		}
+
 		switch (sortOptionsDropdown.Selected)
 		{
 			case 0: 
-				CombSort(); 
 				sorting = true;
+				await CombSort(); 
 			break;
 			case 1: 
-				BubbleSort(); 
 				sorting = true;
+				await BubbleSort(); 
 			break;
 			case 2: 
-				StalinSort(); 
 				sorting = true;
+				await StalinSort(); 
 			break;
 			case 3: 
-				BogoSort(); 
 				sorting = true;
+				await BogoSort(); 
+			break;
+			case 4:
+				sorting = true;
+				await QuickSort(0, GetChildCount() - 1);
 			break;
 		}
 	}
@@ -65,6 +75,7 @@ public partial class SVController : HBoxContainer
 	public void UpdateArray()
 	{
 		sorting = false;
+		shuffling = false;
 
 		foreach (Node child in GetChildren())
 			child.QueueFree();
@@ -92,14 +103,25 @@ public partial class SVController : HBoxContainer
 	{
     	for (int i = 0; i < GetChildCount() - 1; i++) 
 		{
-      		if (GetChild<ColorRect>(i).CustomMinimumSize.Y > GetChild<ColorRect>(i + 1).CustomMinimumSize.Y)
+      		if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1)))
         	return false;
     	}
     	return true;
   	}
 
+	public static float GetHeight(Node node)
+	{
+        if (node is ColorRect rect)
+            return rect.CustomMinimumSize.Y;
+		else
+			return -1;
+    }
+
 	public async void ShuffleChildren()
 	{
+		if (sorting == true || shuffling == true)
+			return;
+
 		shuffling = true;
 
 		RandomNumberGenerator rand = new();
@@ -131,7 +153,43 @@ public partial class SVController : HBoxContainer
 		shuffling = false;
 	}
 
-	public async void CombSort()
+	public async Task QuickSort(int low, int high)
+	{
+		if (low < high && low >= 0 && high >= 0)
+		{
+			Node pivot = GetChildren()[low];
+			int i = low - 1;
+			int j = high + 1;
+			while (true)
+			{
+				sorting = true;
+
+				do 
+					i++;
+				while(GetHeight(GetChildren()[i]) < GetHeight(pivot));
+
+				do 
+					j--;
+				while(GetHeight(GetChildren()[j]) > GetHeight(pivot));
+
+				if (i >= j)
+					break;
+
+				Node temp = GetChild(j);
+				MoveChild(GetChild(i), j);
+				MoveChild(temp, i);
+
+				await Wait(0.001f);
+			}
+
+            _ = QuickSort(low, j);
+            _ = QuickSort(j + 1, high);
+		}
+		else
+			sorting = false;
+	}
+
+	public async Task CombSort()
   	{
     	int gap = GetChildCount();
     	bool sorted = false;
@@ -154,7 +212,7 @@ public partial class SVController : HBoxContainer
     	  	{
 				Array<Node> children = GetChildren();
     	    	// If arr[i] is greater than the arr[i + gap] then swap
-    	    	if (GetChild<ColorRect>(i).CustomMinimumSize.Y > GetChild<ColorRect>(i + gap).CustomMinimumSize.Y)
+    	    	if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + gap)))
     	    	{
 					selectedRects.Clear();
 
@@ -180,14 +238,14 @@ public partial class SVController : HBoxContainer
 		sorting = false;
   	}
 
-	public async void BubbleSort()
+	public async Task BubbleSort()
 	{
 		while (!ArraySorted())
 		{
 			for (int i = 0; i < GetChildCount() - 1; i++)
 			{
 				Array<Node> children = GetChildren();
-				if (GetChild<ColorRect>(i).CustomMinimumSize.Y > GetChild<ColorRect>(i + 1).CustomMinimumSize.Y)
+				if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1)))
 				{
 					selectedRects.Clear();
 
@@ -210,11 +268,11 @@ public partial class SVController : HBoxContainer
 		sorting = false;
 	}
 
-	public async void StalinSort() 
+	public async Task StalinSort() 
 	{
     	for (int i = 0; i < GetChildCount() - 1; i++) 
 		{
-      		if (GetChild<ColorRect>(i).CustomMinimumSize.Y > GetChild<ColorRect>(i + 1).CustomMinimumSize.Y) 
+      		if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1))) 
 			{
 				selectedRects.Clear();
 
@@ -233,7 +291,7 @@ public partial class SVController : HBoxContainer
 		sorting = false;
   	}
 
-	public async void BogoSort()
+	public async Task BogoSort()
 	{
     	while (!ArraySorted())
 		{
