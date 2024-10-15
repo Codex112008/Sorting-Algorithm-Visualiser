@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Collections;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,6 +9,8 @@ public partial class SVController : HBoxContainer
 	[Export] private Slider arrLengthSlider;
 	[Export] private RichTextLabel lengthDisplay;
 	[Export] private OptionButton sortOptionsDropdown;
+	[Export] private Slider delaySlider;
+	[Export] private RichTextLabel delayDisplay;
 
 	private double value;
 	private bool shuffling;
@@ -38,6 +39,8 @@ public partial class SVController : HBoxContainer
 			else
 				rect.Color = new(1, 1, 1, 1);
 		}
+
+		delayDisplay.Text = delaySlider.Value + "ms";
 	}
 
 	public async void SortArray()
@@ -45,7 +48,7 @@ public partial class SVController : HBoxContainer
 		if (sorting == true)
 		{
 			sorting = false;
-			await Wait(0.0025f, -1);
+			await Wait(-1);
 		}
 
 		switch ((SortingMethod)sortOptionsDropdown.Selected)
@@ -69,6 +72,10 @@ public partial class SVController : HBoxContainer
 			case SortingMethod.QuickSort:
 				sorting = true;
 				await QuickSort(0, GetChildCount() - 1);
+			break;
+			case SortingMethod.SelectionSort:
+				sorting = true;
+				await SelectionSort();
 			break;
 		}
 	}
@@ -95,24 +102,14 @@ public partial class SVController : HBoxContainer
 		lengthDisplay.Text = arrLengthSlider.Value.ToString();
 	}
 
-	public async Task Wait(float seconds, int i)
+	public async Task Wait(int i)
 	{
 		int divisor = arrLengthSlider.Value > 750 ? 8 :
               	arrLengthSlider.Value > 500 ? 4 :
               	arrLengthSlider.Value > 250 ? 2 : 1;
-		if (i % divisor == 0 || i == -1)
-			await ToSignal(GetTree().CreateTimer(seconds), "timeout");
+		if (i % divisor == 0 || i == -1 || delaySlider.Value > 50)
+			await ToSignal(GetTree().CreateTimer(delaySlider.Value / 1000), "timeout");
 	}
-
-	public bool ArraySorted() 
-	{
-    	for (int i = 0; i < GetChildCount() - 1; i++) 
-		{
-      		if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1)))
-        	return false;
-    	}
-    	return true;
-  	}
 
 	public static float GetHeight(Node node)
 	{
@@ -143,15 +140,11 @@ public partial class SVController : HBoxContainer
 			selectedRects.Add(GetChild<ColorRect>(randInt));
 			selectedRects.Add(GetChild<ColorRect>(i));
 
+			await Wait(i);
+
 			Node temp = GetChild(randInt);
 			MoveChild(children[i], randInt);
 			MoveChild(temp, i);
-			
-			int divisor = arrLengthSlider.Value > 750 ? 8 :
-              	arrLengthSlider.Value > 500 ? 4 :
-              	arrLengthSlider.Value > 250 ? 2 : 1;
-			if (i % divisor == 0)
-   				await Wait(0.001f, i);
 		}
 		selectedRects.Clear();
 
@@ -184,7 +177,7 @@ public partial class SVController : HBoxContainer
 				MoveChild(GetChild(i), j);
 				MoveChild(temp, i);
 
-				await Wait(0.001f, i);
+				await Wait(i);
 			}
 
             _ = QuickSort(low, j);
@@ -234,7 +227,7 @@ public partial class SVController : HBoxContainer
         	  		// If swapped, check next pass if sorted
         	  		sorted = false;
 
-					await Wait(0.001f, i);
+					await Wait(i);
         		}
       		}
     	}
@@ -243,11 +236,43 @@ public partial class SVController : HBoxContainer
 		sorting = false;
   	}
 
+	public async Task SelectionSort()
+	{
+		for (int i = 0; i < GetChildCount() - 1; i++)
+		{
+			Array<Node> children = GetChildren();
+
+			selectedRects.Clear();
+
+			int min = i;
+			for (int j = i + 1; j < GetChildCount(); j++)
+			{
+				selectedRects.Clear();
+				if (GetHeight(GetChild(j)) < GetHeight(GetChild(min)))
+				{
+					min = j;
+					selectedRects.Add(GetChild<ColorRect>(min));
+				}
+			}
+				
+			selectedRects.Add(GetChild<ColorRect>(min));
+			selectedRects.Add(GetChild<ColorRect>(i));
+			
+			MoveChild(children[min], i);
+			MoveChild(children[i], min);
+
+			await Wait(i);
+		}
+		selectedRects.Clear();
+
+		sorting = false;
+	}
+
 	public async Task BubbleSort()
 	{
-		while (!ArraySorted())
+		for (int j = 1; j < GetChildCount() - 1; j++)
 		{
-			for (int i = 0; i < GetChildCount() - 1; i++)
+			for (int i = 0; i < GetChildCount() - j; i++)
 			{
 				Array<Node> children = GetChildren();
 				if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1)))
@@ -264,7 +289,7 @@ public partial class SVController : HBoxContainer
 					MoveChild(children[i], i + 1);
 					MoveChild(children[i + 1], i);
 
-					await Wait(0.001f, i);
+					await Wait(i);
 				}
 			}
 		}
@@ -289,7 +314,7 @@ public partial class SVController : HBoxContainer
         		GetChild(i + 1).QueueFree();
         		i--;
 
-				await Wait(0.001f, i);
+				await Wait(i);
       		}
     	}
 
@@ -298,8 +323,16 @@ public partial class SVController : HBoxContainer
 
 	public async Task BogoSort()
 	{
-    	while (!ArraySorted())
+		bool sorted = false;
+    	while (!sorted)
 		{
+			sorted = true;
+			for (int i = 0; i < GetChildCount() - 1; i++) 
+			{
+      			if (GetHeight(GetChild(i)) > GetHeight(GetChild(i + 1)))
+        			sorted = false;
+    		}
+
 			RandomNumberGenerator rand = new();
 			Array<Node> children = GetChildren();
 			for (int i = 0; i < GetChildCount(); i++)
@@ -318,7 +351,7 @@ public partial class SVController : HBoxContainer
 				MoveChild(children[i], randInt);
 				MoveChild(temp, i);
 
-				await Wait(0.001f, i);
+				await Wait(i);
 			}
 			selectedRects.Clear();
 		}
@@ -333,5 +366,6 @@ enum SortingMethod
 	BubbleSort = 1,
 	StalinSort = 2,
 	BogoSort = 3,
-	QuickSort = 4
+	QuickSort = 4,
+	SelectionSort = 5
 }

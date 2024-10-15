@@ -12,7 +12,7 @@ grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="Sorting Visualisation Area" type="HBoxContainer" parent="." node_paths=PackedStringArray("arrLengthSlider", "lengthDisplay", "sortOptionsDropdown")]
+[node name="Sorting Visualisation Area" type="HBoxContainer" parent="." node_paths=PackedStringArray("arrLengthSlider", "lengthDisplay", "sortOptionsDropdown", "delaySlider", "delayDisplay")]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.074
@@ -27,6 +27,8 @@ selectedColor = Color(1, 0, 0, 1)
 arrLengthSlider = NodePath("../Buttons/ArrLengthInput")
 lengthDisplay = NodePath("../Buttons/LengthDisplay")
 sortOptionsDropdown = NodePath("../Buttons/SortingMethod")
+delaySlider = NodePath("../Buttons/DelaySlider")
+delayDisplay = NodePath("../Buttons/DelayDisplay")
 
 [node name="Buttons" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -38,7 +40,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ArrLengthInput" type="HSlider" parent="Buttons"]
-custom_minimum_size = Vector2(230.4, 48)
+custom_minimum_size = Vector2(250, 48)
 layout_mode = 2
 min_value = 8.0
 max_value = 1024.0
@@ -50,6 +52,18 @@ rounded = true
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
+[node name="DelaySlider" type="HSlider" parent="Buttons"]
+custom_minimum_size = Vector2(250, 48)
+layout_mode = 2
+min_value = 1.0
+max_value = 1000.0
+value = 1.0
+rounded = true
+
+[node name="DelayDisplay" type="RichTextLabel" parent="Buttons"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
 [node name="ShuffleArrayButton" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
@@ -58,7 +72,7 @@ text = "Shuffle"
 [node name="SortingMethod" type="OptionButton" parent="Buttons"]
 layout_mode = 2
 selected = 1
-item_count = 5
+item_count = 6
 popup/item_0/text = "Comb Sort"
 popup/item_1/text = "Bubble Sort"
 popup/item_1/id = 1
@@ -68,6 +82,8 @@ popup/item_3/text = "Bogo Sort"
 popup/item_3/id = 3
 popup/item_4/text = "Quicksort"
 popup/item_4/id = 4
+popup/item_5/text = "Selection Sort"
+popup/item_5/id = 5
 
 [node name="SortButton" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(100, 0)
