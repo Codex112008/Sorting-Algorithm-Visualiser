@@ -155,7 +155,8 @@ public partial class SVController : HBoxContainer
 	{
 		if (low < high && low >= 0 && high >= 0)
 		{
-			Node pivot = GetChildren()[low];
+			Node pivot = GetChild(low);
+
 			int i = low - 1;
 			int j = high + 1;
 			while (true)
@@ -173,11 +174,17 @@ public partial class SVController : HBoxContainer
 				if (i >= j)
 					break;
 
+				selectedRects.Add(GetChild<ColorRect>(i));
+				selectedRects.Add(GetChild<ColorRect>(j));
+
+				await Wait(i);
+
 				Node temp = GetChild(j);
 				MoveChild(GetChild(i), j);
 				MoveChild(temp, i);
 
-				await Wait(i);
+				selectedRects.Remove(GetChild<ColorRect>(i));
+				selectedRects.Remove(GetChild<ColorRect>(j));
 			}
 
             _ = QuickSort(low, j);
@@ -220,14 +227,14 @@ public partial class SVController : HBoxContainer
 					selectedRects.Add(GetChild<ColorRect>(i + gap));
 					selectedRects.Add(GetChild<ColorRect>(i));
 
+					await Wait(i);
+
          			// Swap the two values
         	  		MoveChild(children[i], i + gap);
         	  		MoveChild(children[i + gap], i);
           
         	  		// If swapped, check next pass if sorted
         	  		sorted = false;
-
-					await Wait(i);
         		}
       		}
     	}
@@ -257,11 +264,11 @@ public partial class SVController : HBoxContainer
 				
 			selectedRects.Add(GetChild<ColorRect>(min));
 			selectedRects.Add(GetChild<ColorRect>(i));
+
+			await Wait(i);
 			
 			MoveChild(children[min], i);
 			MoveChild(children[i], min);
-
-			await Wait(i);
 		}
 		selectedRects.Clear();
 
@@ -285,11 +292,11 @@ public partial class SVController : HBoxContainer
 					selectedRects.Add(GetChild<ColorRect>(i + 1));
 					selectedRects.Add(GetChild<ColorRect>(i));
 
+					await Wait(i);
+
 					// Swap the two values
 					MoveChild(children[i], i + 1);
 					MoveChild(children[i + 1], i);
-
-					await Wait(i);
 				}
 			}
 		}
@@ -311,10 +318,10 @@ public partial class SVController : HBoxContainer
 
 				selectedRects.Add(GetChild<ColorRect>(i + 1));
 
+				await Wait(i);
+
         		GetChild(i + 1).QueueFree();
         		i--;
-
-				await Wait(i);
       		}
     	}
 
@@ -347,11 +354,11 @@ public partial class SVController : HBoxContainer
 				selectedRects.Add(GetChild<ColorRect>(randInt));
 				selectedRects.Add(GetChild<ColorRect>(i));
 
+				await Wait(i);
+
 				Node temp = GetChild(randInt);
 				MoveChild(children[i], randInt);
 				MoveChild(temp, i);
-
-				await Wait(i);
 			}
 			selectedRects.Clear();
 		}
