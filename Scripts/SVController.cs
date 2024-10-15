@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -44,28 +45,28 @@ public partial class SVController : HBoxContainer
 		if (sorting == true)
 		{
 			sorting = false;
-			await Wait(0.0025f);
+			await Wait(0.0025f, -1);
 		}
 
-		switch (sortOptionsDropdown.Selected)
+		switch ((SortingMethod)sortOptionsDropdown.Selected)
 		{
-			case 0: 
+			case SortingMethod.CombSort: 
 				sorting = true;
 				await CombSort(); 
 			break;
-			case 1: 
+			case SortingMethod.BubbleSort: 
 				sorting = true;
 				await BubbleSort(); 
 			break;
-			case 2: 
+			case SortingMethod.StalinSort: 
 				sorting = true;
 				await StalinSort(); 
 			break;
-			case 3: 
+			case SortingMethod.BogoSort: 
 				sorting = true;
 				await BogoSort(); 
 			break;
-			case 4:
+			case SortingMethod.QuickSort:
 				sorting = true;
 				await QuickSort(0, GetChildCount() - 1);
 			break;
@@ -94,9 +95,13 @@ public partial class SVController : HBoxContainer
 		lengthDisplay.Text = arrLengthSlider.Value.ToString();
 	}
 
-	public async Task Wait(float seconds)
+	public async Task Wait(float seconds, int i)
 	{
-		await ToSignal(GetTree().CreateTimer(seconds), SceneTreeTimer.SignalName.Timeout);
+		int divisor = arrLengthSlider.Value > 750 ? 8 :
+              	arrLengthSlider.Value > 500 ? 4 :
+              	arrLengthSlider.Value > 250 ? 2 : 1;
+		if (i % divisor == 0 || i == -1)
+			await ToSignal(GetTree().CreateTimer(seconds), "timeout");
 	}
 
 	public bool ArraySorted() 
@@ -146,7 +151,7 @@ public partial class SVController : HBoxContainer
               	arrLengthSlider.Value > 500 ? 4 :
               	arrLengthSlider.Value > 250 ? 2 : 1;
 			if (i % divisor == 0)
-   				await Wait(0.001f);
+   				await Wait(0.001f, i);
 		}
 		selectedRects.Clear();
 
@@ -179,7 +184,7 @@ public partial class SVController : HBoxContainer
 				MoveChild(GetChild(i), j);
 				MoveChild(temp, i);
 
-				await Wait(0.001f);
+				await Wait(0.001f, i);
 			}
 
             _ = QuickSort(low, j);
@@ -229,7 +234,7 @@ public partial class SVController : HBoxContainer
         	  		// If swapped, check next pass if sorted
         	  		sorted = false;
 
-					await Wait(0.001f);
+					await Wait(0.001f, i);
         		}
       		}
     	}
@@ -259,7 +264,7 @@ public partial class SVController : HBoxContainer
 					MoveChild(children[i], i + 1);
 					MoveChild(children[i + 1], i);
 
-					await Wait(0.001f);
+					await Wait(0.001f, i);
 				}
 			}
 		}
@@ -284,7 +289,7 @@ public partial class SVController : HBoxContainer
         		GetChild(i + 1).QueueFree();
         		i--;
 
-				await Wait(0.001f);
+				await Wait(0.001f, i);
       		}
     	}
 
@@ -313,11 +318,20 @@ public partial class SVController : HBoxContainer
 				MoveChild(children[i], randInt);
 				MoveChild(temp, i);
 
-				await Wait(0.001f);
+				await Wait(0.001f, i);
 			}
 			selectedRects.Clear();
 		}
 
 		sorting = false;
   	}
+}
+
+enum SortingMethod
+{
+	CombSort = 0,
+	BubbleSort = 1,
+	StalinSort = 2,
+	BogoSort = 3,
+	QuickSort = 4
 }

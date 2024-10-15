@@ -74,10 +74,5 @@ custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "Sort"
 
-[node name="CodeEdit" type="CodeEdit" parent="."]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
-
 [connection signal="button_down" from="Buttons/ShuffleArrayButton" to="Sorting Visualisation Area" method="ShuffleChildren"]
 [connection signal="button_down" from="Buttons/SortButton" to="Sorting Visualisation Area" method="SortArray"]
