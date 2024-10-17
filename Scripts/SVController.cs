@@ -365,6 +365,14 @@ public partial class SVController : HBoxContainer
 
 		sorting = false;
   	}
+
+	public async Task pidgeonHoleSort()
+	{
+		for (int i = 0; i < GetChildCount(); i++)
+		{
+			
+		}
+	}
 }
 
 enum SortingMethod
